@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "Dairy Farm Management System - Next.js Web Application",
   "private": true,
+  "author": "Salman Ahamed",
+  "license": "ISC",
+  "homepage": "https://github.com/Salman-Ahamed/dairy-farm-management-system",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Salman-Ahamed/dairy-farm-management-system.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
