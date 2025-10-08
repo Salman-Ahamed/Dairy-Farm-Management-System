@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import {
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Pencil,
   Plus,
@@ -22,9 +24,12 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const ITEMS_PER_PAGE = 5;
+
 export default function FinancePage() {
   const [financeRecords, setFinanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -60,6 +65,28 @@ export default function FinancePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(financeRecords.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentRecords = financeRecords.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -143,7 +170,7 @@ export default function FinancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {financeRecords.map((record: any) => (
+              {currentRecords.map((record: any) => (
                 <TableRow key={record.id}>
                   <TableCell>{formatDate(record.date)}</TableCell>
                   <TableCell>
@@ -188,6 +215,54 @@ export default function FinancePage() {
               ))}
             </TableBody>
           </Table>
+        )}
+
+        {/* Pagination Controls */}
+        {!loading && financeRecords.length > ITEMS_PER_PAGE && (
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Showing {startIndex + 1} to{" "}
+              {Math.min(endIndex, financeRecords.length)} of{" "}
+              {financeRecords.length} records
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(page)}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  )
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         )}
       </Card>
     </div>
