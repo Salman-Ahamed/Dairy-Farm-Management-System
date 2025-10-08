@@ -42,13 +42,10 @@ export async function POST(request: Request) {
 
     // If buyer name is provided but no customerId, create or find customer
     if (data.buyer && !customerId) {
-      // Try to find existing customer by name
+      // Try to find existing customer by exact name
       let customer = await prisma.customer.findFirst({
-        where: { 
-          name: {
-            equals: data.buyer,
-            mode: 'insensitive'
-          }
+        where: {
+          name: data.buyer,
         },
       });
 

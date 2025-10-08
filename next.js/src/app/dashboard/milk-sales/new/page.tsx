@@ -15,21 +15,59 @@ import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function NewMilkSalePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [formData, setFormData] = useState({
     saleDate: new Date().toISOString().split("T")[0],
     quantity: "",
     pricePerLiter: "",
     buyer: "",
+    customerId: "",
     paymentStatus: "PENDING",
     paymentMethod: "",
     notes: "",
   });
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch("/api/customers");
+      if (response.ok) {
+        const data = await response.json();
+        setCustomers(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch customers:", error);
+    }
+  };
+
+  const handleCustomerSelect = (customerId: string) => {
+    const customer = customers.find((c: any) => c.id === customerId);
+    if (customer) {
+      setSelectedCustomer(customer);
+      setFormData({
+        ...formData,
+        customerId: customer.id,
+        buyer: customer.name,
+        pricePerLiter:
+          customer.defaultPricePerLiter?.toString() || formData.pricePerLiter,
+      });
+    }
+  };
+
+  const handleBuyerNameChange = (name: string) => {
+    setFormData({ ...formData, buyer: name, customerId: "" });
+    setSelectedCustomer(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +141,8 @@ export default function NewMilkSalePage() {
                   Auto Customer Registration
                 </p>
                 <p className="text-sm text-green-700 mt-1">
-                  If buyer name is new, customer will be <strong>automatically created</strong> with default rate.
+                  If buyer name is new, customer will be{" "}
+                  <strong>automatically created</strong> with default rate.
                 </p>
               </div>
             </div>
@@ -146,6 +185,27 @@ export default function NewMilkSalePage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="customer">Select Existing Customer</Label>
+                <Select
+                  value={formData.customerId}
+                  onValueChange={handleCustomerSelect}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a customer (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((customer: any) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                        {customer.defaultPricePerLiter &&
+                          ` - ${customer.defaultPricePerLiter}৳/L`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="pricePerLiter">Price per Liter *</Label>
                 <Input
                   id="pricePerLiter"
@@ -160,14 +220,19 @@ export default function NewMilkSalePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="buyer">Buyer Name</Label>
+                <Label htmlFor="buyer">Or Enter New Buyer Name</Label>
                 <Input
                   id="buyer"
+                  placeholder="Type new customer name"
                   value={formData.buyer}
-                  onChange={(e) =>
-                    setFormData({ ...formData, buyer: e.target.value })
-                  }
+                  onChange={(e) => handleBuyerNameChange(e.target.value)}
                 />
+                {selectedCustomer && (
+                  <p className="text-sm text-green-600">
+                    ✓ Using default price:{" "}
+                    {selectedCustomer.defaultPricePerLiter}৳/L
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
