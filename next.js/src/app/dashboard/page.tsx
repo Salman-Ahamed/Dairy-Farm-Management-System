@@ -1,6 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { prisma } from "@/lib/prisma"
-import { Beef, Heart, Milk, Users, TrendingUp, TrendingDown } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
+import {
+  Beef,
+  Heart,
+  Milk,
+  PackageCheck,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
 async function getDashboardStats() {
   const [
@@ -9,7 +16,7 @@ async function getDashboardStats() {
     healthRecords,
     todayMilkRecords,
     totalEmployees,
-    monthlyMilkSales
+    monthlyMilkSales,
   ] = await Promise.all([
     prisma.animal.count(),
     prisma.animal.count({ where: { status: "ACTIVE" } }),
@@ -17,29 +24,42 @@ async function getDashboardStats() {
     prisma.milkRecord.count({
       where: {
         date: {
-          gte: new Date(new Date().setHours(0, 0, 0, 0))
-        }
-      }
+          gte: new Date(new Date().setHours(0, 0, 0, 0)),
+        },
+      },
     }),
     prisma.employee.count({ where: { status: "ACTIVE" } }),
     prisma.milkSale.aggregate({
       _sum: { totalAmount: true },
       where: {
         saleDate: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-        }
-      }
-    })
-  ])
+          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      },
+    }),
+  ]);
 
   const todayMilkProduction = await prisma.milkRecord.aggregate({
     _sum: { totalYield: true },
     where: {
       date: {
-        gte: new Date(new Date().setHours(0, 0, 0, 0))
-      }
-    }
-  })
+        gte: new Date(new Date().setHours(0, 0, 0, 0)),
+      },
+    },
+  });
+
+  // Calculate milk stock
+  const totalMilkProduced = await prisma.milkRecord.aggregate({
+    _sum: { totalYield: true },
+  });
+
+  const totalMilkSold = await prisma.milkSale.aggregate({
+    _sum: { quantity: true },
+  });
+
+  const currentMilkStock =
+    (totalMilkProduced._sum.totalYield || 0) -
+    (totalMilkSold._sum.quantity || 0);
 
   return {
     totalAnimals,
@@ -48,12 +68,15 @@ async function getDashboardStats() {
     todayMilkRecords,
     totalEmployees,
     monthlyMilkSales: monthlyMilkSales._sum.totalAmount || 0,
-    todayMilkProduction: todayMilkProduction._sum.totalYield || 0
-  }
+    todayMilkProduction: todayMilkProduction._sum.totalYield || 0,
+    currentMilkStock,
+    totalMilkProduced: totalMilkProduced._sum.totalYield || 0,
+    totalMilkSold: totalMilkSold._sum.quantity || 0,
+  };
 }
 
 export default async function DashboardPage() {
-  const stats = await getDashboardStats()
+  const stats = await getDashboardStats();
 
   const statCards = [
     {
@@ -61,48 +84,59 @@ export default async function DashboardPage() {
       value: stats.totalAnimals,
       description: `${stats.activeAnimals} active`,
       icon: Beef,
-      color: "text-blue-600"
+      color: "text-blue-600",
     },
     {
       title: "Health Alerts",
       value: stats.healthRecords,
       description: "Under treatment",
       icon: Heart,
-      color: "text-red-600"
+      color: "text-red-600",
     },
     {
       title: "Today's Milk Production",
       value: `${stats.todayMilkProduction.toFixed(1)} L`,
       description: `${stats.todayMilkRecords} records`,
       icon: Milk,
-      color: "text-green-600"
+      color: "text-green-600",
+    },
+    {
+      title: "Current Milk Stock",
+      value: `${stats.currentMilkStock.toFixed(1)} L`,
+      description: `${stats.totalMilkProduced.toFixed(
+        1
+      )}L produced - ${stats.totalMilkSold.toFixed(1)}L sold`,
+      icon: PackageCheck,
+      color: stats.currentMilkStock < 100 ? "text-orange-600" : "text-cyan-600",
     },
     {
       title: "Active Employees",
       value: stats.totalEmployees,
       description: "Working staff",
       icon: Users,
-      color: "text-purple-600"
+      color: "text-purple-600",
     },
     {
       title: "Monthly Sales",
       value: `৳${stats.monthlyMilkSales.toLocaleString()}`,
       description: "This month",
       icon: TrendingUp,
-      color: "text-emerald-600"
-    }
-  ]
+      color: "text-emerald-600",
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Welcome to your dairy farm management system</p>
+        <p className="text-gray-500 mt-1">
+          Welcome to your dairy farm management system
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
           return (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -118,7 +152,7 @@ export default async function DashboardPage() {
                 </p>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -139,18 +173,27 @@ export default async function DashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <a href="/dashboard/animals" className="block p-3 rounded-lg hover:bg-gray-50 border">
+            <a
+              href="/dashboard/animals"
+              className="block p-3 rounded-lg hover:bg-gray-50 border"
+            >
               <div className="font-medium">Add New Animal</div>
-              <div className="text-sm text-muted-foreground">Register a new animal</div>
+              <div className="text-sm text-muted-foreground">
+                Register a new animal
+              </div>
             </a>
-            <a href="/dashboard/milk" className="block p-3 rounded-lg hover:bg-gray-50 border">
+            <a
+              href="/dashboard/milk"
+              className="block p-3 rounded-lg hover:bg-gray-50 border"
+            >
               <div className="font-medium">Record Milk Production</div>
-              <div className="text-sm text-muted-foreground">Log today's milk yield</div>
+              <div className="text-sm text-muted-foreground">
+                Log today&apos;s milk yield
+              </div>
             </a>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -74,6 +74,24 @@ export default function NewMilkSalePage() {
           <p className="text-gray-500 mt-1">Record milk sale transaction</p>
         </div>
       </div>
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-blue-900">
+                Automatic Finance Tracking
+              </p>
+              <p className="text-sm text-blue-700 mt-1">
+                If payment status is set to <strong>PAID</strong>, this milk
+                sale will be automatically recorded as <strong>Income</strong>{" "}
+                in your Farm Finance records.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

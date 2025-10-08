@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Info, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -176,6 +176,48 @@ export default function MilkSaleDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {sale.paymentStatus === "PAID" && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-green-900">
+                  Automatic Finance Record
+                </p>
+                <p className="text-sm text-green-700 mt-1">
+                  This milk sale has been automatically recorded as income in
+                  Farm Finance since payment is marked as PAID.
+                </p>
+                <Link href="/dashboard/finance" className="inline-block mt-2">
+                  <Button variant="link" className="text-green-600 p-0 h-auto">
+                    View Finance Records →
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {sale.paymentStatus !== "PAID" && (
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <div>
+                <p className="font-medium text-yellow-900">
+                  Pending Finance Record
+                </p>
+                <p className="text-sm text-yellow-700 mt-1">
+                  This milk sale will be recorded in Farm Finance only when
+                  payment status is updated to <strong>PAID</strong>.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

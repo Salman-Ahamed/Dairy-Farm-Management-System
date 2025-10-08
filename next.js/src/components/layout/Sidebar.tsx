@@ -9,6 +9,7 @@ import {
   Home,
   LogOut,
   Milk,
+  PackageCheck,
   ShoppingCart,
   Users,
   Wallet,
@@ -38,6 +39,11 @@ const menuItems = [
     title: "Milk Sales",
     href: "/dashboard/milk-sales",
     icon: DollarSign,
+  },
+  {
+    title: "Milk Stock",
+    href: "/dashboard/milk-stock",
+    icon: PackageCheck,
   },
   {
     title: "Animal Health",

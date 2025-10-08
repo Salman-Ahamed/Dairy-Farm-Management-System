@@ -36,7 +36,9 @@ export async function POST(request: Request) {
     const quantity = parseFloat(data.quantity);
     const pricePerLiter = parseFloat(data.pricePerLiter);
     const totalAmount = quantity * pricePerLiter;
+    const paymentStatus = data.paymentStatus || "PENDING";
 
+    // Create milk sale
     const milkSale = await prisma.milkSale.create({
       data: {
         saleDate: new Date(data.saleDate),
@@ -44,11 +46,29 @@ export async function POST(request: Request) {
         pricePerLiter,
         totalAmount,
         buyer: data.buyer || null,
-        paymentStatus: data.paymentStatus || "PENDING",
+        paymentStatus,
         paymentMethod: data.paymentMethod || null,
         notes: data.notes || null,
       },
     });
+
+    // Only create finance record if payment status is PAID
+    if (paymentStatus === "PAID") {
+      await prisma.finance.create({
+        data: {
+          date: new Date(data.saleDate),
+          type: "INCOME",
+          category: "Milk Sale",
+          description: `Milk sale to ${
+            data.buyer || "customer"
+          } - ${quantity}L @ ${pricePerLiter}/L`,
+          amount: totalAmount,
+          paymentMethod: data.paymentMethod || null,
+          referenceNumber: `MILK-SALE-${milkSale.id}`,
+          notes: data.notes || null,
+        },
+      });
+    }
 
     return NextResponse.json(milkSale, { status: 201 });
   } catch (error) {
