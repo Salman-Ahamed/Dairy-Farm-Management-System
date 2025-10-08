@@ -346,6 +346,22 @@ export default async function DashboardPage() {
                 </div>
               </Button>
             </Link>
+            <Link href="/dashboard/stockfeed/new">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-4"
+              >
+                <div className="flex items-center w-full">
+                  <ShoppingCart className="mr-3 h-6 w-6 text-orange-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-semibold">Add Stock Feed</div>
+                    <div className="text-xs text-gray-500">
+                      Purchase feed inventory
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
