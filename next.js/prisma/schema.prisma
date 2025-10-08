@@ -11,14 +11,14 @@ datasource db {
 
 // User Management
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  name          String
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("users")
 }
 
@@ -30,29 +30,29 @@ enum UserRole {
 
 // Animal Records
 model Animal {
-  id                String           @id @default(cuid())
-  tagNumber         String           @unique
-  breed             String
-  gender            Gender
-  dateOfBirth       DateTime
-  purchaseDate      DateTime?
-  purchasePrice     Float?
-  status            AnimalStatus     @default(ACTIVE)
-  currentWeight     Float?
-  origin            String?
-  color             String?
-  notes             String?          @db.Text
-  imageUrl          String?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  id            String       @id @default(cuid())
+  tagNumber     String       @unique
+  breed         String
+  gender        Gender
+  dateOfBirth   DateTime
+  purchaseDate  DateTime?
+  purchasePrice Float?
+  status        AnimalStatus @default(ACTIVE)
+  currentWeight Float?
+  origin        String?
+  color         String?
+  notes         String?      @db.Text
+  imageUrl      String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
   // Relations
-  healthRecords     AnimalHealth[]
-  weightRecords     AnimalWeight[]
-  breedingRecords   BreedingMale[]
-  breedingFemale    BreedingFemale[]
-  milkRecords       MilkRecord[]
-  
+  healthRecords   AnimalHealth[]
+  weightRecords   AnimalWeight[]
+  breedingRecords BreedingMale[]
+  breedingFemale  BreedingFemale[]
+  milkRecords     MilkRecord[]
+
   @@map("animals")
 }
 
@@ -85,7 +85,7 @@ model AnimalHealth {
   notes             String?      @db.Text
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
-  
+
   @@index([animalId])
   @@map("animal_health")
 }
@@ -99,38 +99,38 @@ enum HealthStatus {
 
 // Animal Weight Records
 model AnimalWeight {
-  id              String   @id @default(cuid())
-  animalId        String
-  animal          Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  dateOfWeighing  DateTime
-  weight          Float
-  height          Float?
-  bodyCondition   String?
-  notes           String?  @db.Text
-  createdAt       DateTime @default(now())
-  
+  id             String   @id @default(cuid())
+  animalId       String
+  animal         Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  dateOfWeighing DateTime
+  weight         Float
+  height         Float?
+  bodyCondition  String?
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+
   @@index([animalId])
   @@map("animal_weight")
 }
 
 // Breeding Records
 model Breeding {
-  id                String           @id @default(cuid())
+  id                String          @id @default(cuid())
   dateOfBreeding    DateTime
   expectedDelivery  DateTime?
   actualDelivery    DateTime?
   breedingMethod    BreedingMethod
-  outcome           BreedingOutcome  @default(PENDING)
+  outcome           BreedingOutcome @default(PENDING)
   numberOfOffspring Int?
-  notes             String?          @db.Text
+  notes             String?         @db.Text
   cost              Float?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
   // Relations
-  maleAnimals       BreedingMale[]
-  femaleAnimals     BreedingFemale[]
-  
+  maleAnimals   BreedingMale[]
+  femaleAnimals BreedingFemale[]
+
   @@map("breeding")
 }
 
@@ -140,7 +140,7 @@ model BreedingMale {
   animalId   String
   breeding   Breeding @relation(fields: [breedingId], references: [id], onDelete: Cascade)
   animal     Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  
+
   @@index([breedingId])
   @@index([animalId])
   @@map("breeding_male")
@@ -152,7 +152,7 @@ model BreedingFemale {
   animalId   String
   breeding   Breeding @relation(fields: [breedingId], references: [id], onDelete: Cascade)
   animal     Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  
+
   @@index([breedingId])
   @@index([animalId])
   @@map("breeding_female")
@@ -172,19 +172,19 @@ enum BreedingOutcome {
 
 // Milk Production Records
 model MilkRecord {
-  id            String   @id @default(cuid())
-  animalId      String
-  animal        Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  date          DateTime
-  morningYield  Float?
+  id             String      @id @default(cuid())
+  animalId       String
+  animal         Animal      @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  date           DateTime
+  morningYield   Float?
   afternoonYield Float?
-  eveningYield  Float?
-  totalYield    Float
-  quality       MilkQuality @default(GOOD)
-  fatContent    Float?
-  notes         String?  @db.Text
-  createdAt     DateTime @default(now())
-  
+  eveningYield   Float?
+  totalYield     Float
+  quality        MilkQuality @default(GOOD)
+  fatContent     Float?
+  notes          String?     @db.Text
+  createdAt      DateTime    @default(now())
+
   @@index([animalId])
   @@index([date])
   @@map("milk_records")
@@ -197,9 +197,32 @@ enum MilkQuality {
   POOR
 }
 
+// Customer Management
+model Customer {
+  id                   String    @id @default(cuid())
+  name                 String
+  phone                String?
+  email                String?
+  address              String?   @db.Text
+  defaultPricePerLiter Float?
+  lastPurchaseDate     DateTime?
+  totalPurchases       Float     @default(0)
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  milkSales MilkSale[]
+
+  @@index([name])
+  @@map("customers")
+}
+
 // Milk Sales Records
 model MilkSale {
-  id            String      @id @default(cuid())
+  id            String        @id @default(cuid())
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   saleDate      DateTime
   quantity      Float
   pricePerLiter Float
@@ -207,11 +230,12 @@ model MilkSale {
   buyer         String?
   paymentStatus PaymentStatus @default(PENDING)
   paymentMethod String?
-  notes         String?     @db.Text
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
   @@index([saleDate])
+  @@index([customerId])
   @@map("milk_sales")
 }
 
@@ -223,22 +247,22 @@ enum PaymentStatus {
 
 // Stock Feed Management
 model StockFeed {
-  id              String       @id @default(cuid())
-  feedName        String
-  feedType        FeedType
-  quantity        Float
-  unit            String       @default("kg")
-  purchaseDate    DateTime
-  expiryDate      DateTime?
-  supplier        String?
-  costPerUnit     Float
-  totalCost       Float
-  minimumStock    Float?
-  currentStock    Float
-  notes           String?      @db.Text
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  
+  id           String    @id @default(cuid())
+  feedName     String
+  feedType     FeedType
+  quantity     Float
+  unit         String    @default("kg")
+  purchaseDate DateTime
+  expiryDate   DateTime?
+  supplier     String?
+  costPerUnit  Float
+  totalCost    Float
+  minimumStock Float?
+  currentStock Float
+  notes        String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
   @@index([feedName])
   @@map("stock_feed")
 }
@@ -268,7 +292,7 @@ model Employee {
   notes         String?        @db.Text
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  
+
   @@map("employees")
 }
 
@@ -281,18 +305,18 @@ enum EmployeeStatus {
 
 // Farm Finance Management
 model Finance {
-  id              String          @id @default(cuid())
+  id              String      @id @default(cuid())
   date            DateTime
   type            FinanceType
   category        String
-  description     String          @db.Text
+  description     String      @db.Text
   amount          Float
   paymentMethod   String?
   referenceNumber String?
-  notes           String?         @db.Text
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
   @@index([date])
   @@index([type])
   @@map("finance")
@@ -302,4 +326,3 @@ enum FinanceType {
   INCOME
   EXPENSE
 }
-

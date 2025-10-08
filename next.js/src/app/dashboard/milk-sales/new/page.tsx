@@ -75,23 +75,41 @@ export default function NewMilkSalePage() {
         </div>
       </div>
 
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-blue-900">
-                Automatic Finance Tracking
-              </p>
-              <p className="text-sm text-blue-700 mt-1">
-                If payment status is set to <strong>PAID</strong>, this milk
-                sale will be automatically recorded as <strong>Income</strong>{" "}
-                in your Farm Finance records.
-              </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-blue-900">
+                  Automatic Finance Tracking
+                </p>
+                <p className="text-sm text-blue-700 mt-1">
+                  If payment status is set to <strong>PAID</strong>, this milk
+                  sale will be automatically recorded as <strong>Income</strong>{" "}
+                  in your Farm Finance records.
+                </p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-green-900">
+                  Auto Customer Registration
+                </p>
+                <p className="text-sm text-green-700 mt-1">
+                  If buyer name is new, customer will be <strong>automatically created</strong> with default rate.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>

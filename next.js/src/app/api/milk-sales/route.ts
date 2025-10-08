@@ -38,9 +38,39 @@ export async function POST(request: Request) {
     const totalAmount = quantity * pricePerLiter;
     const paymentStatus = data.paymentStatus || "PENDING";
 
+    let customerId = data.customerId;
+
+    // If buyer name is provided but no customerId, create or find customer
+    if (data.buyer && !customerId) {
+      // Try to find existing customer by name
+      let customer = await prisma.customer.findFirst({
+        where: { 
+          name: {
+            equals: data.buyer,
+            mode: 'insensitive'
+          }
+        },
+      });
+
+      // If customer doesn't exist, create new one
+      if (!customer) {
+        customer = await prisma.customer.create({
+          data: {
+            name: data.buyer,
+            defaultPricePerLiter: pricePerLiter,
+            lastPurchaseDate: new Date(data.saleDate),
+            totalPurchases: quantity,
+          },
+        });
+      }
+
+      customerId = customer.id;
+    }
+
     // Create milk sale
     const milkSale = await prisma.milkSale.create({
       data: {
+        customerId: customerId || null,
         saleDate: new Date(data.saleDate),
         quantity,
         pricePerLiter,
@@ -51,6 +81,19 @@ export async function POST(request: Request) {
         notes: data.notes || null,
       },
     });
+
+    // Update customer's last purchase date and total purchases if customer already existed
+    if (customerId && data.customerId) {
+      await prisma.customer.update({
+        where: { id: customerId },
+        data: {
+          lastPurchaseDate: new Date(data.saleDate),
+          totalPurchases: {
+            increment: quantity,
+          },
+        },
+      });
+    }
 
     // Only create finance record if payment status is PAID
     if (paymentStatus === "PAID") {

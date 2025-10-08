@@ -65,10 +65,14 @@ export async function PUT(
 
     const oldPaymentStatus = oldMilkSale.paymentStatus;
 
+    // Calculate quantity difference for customer update
+    const quantityDiff = quantity - oldMilkSale.quantity;
+
     // Update milk sale
     const milkSale = await prisma.milkSale.update({
       where: { id: params.id },
       data: {
+        customerId: data.customerId || null,
         saleDate: new Date(data.saleDate),
         quantity,
         pricePerLiter,
@@ -79,6 +83,18 @@ export async function PUT(
         notes: data.notes || null,
       },
     });
+
+    // Update customer's total purchases if quantity changed
+    if (data.customerId && quantityDiff !== 0) {
+      await prisma.customer.update({
+        where: { id: data.customerId },
+        data: {
+          totalPurchases: {
+            increment: quantityDiff,
+          },
+        },
+      });
+    }
 
     // Find existing finance record
     const financeRecord = await prisma.finance.findFirst({

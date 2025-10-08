@@ -66,6 +66,11 @@ const menuItems = [
     icon: ShoppingCart,
   },
   {
+    title: "Customers",
+    href: "/dashboard/customers",
+    icon: Users,
+  },
+  {
     title: "Employees",
     href: "/dashboard/employees",
     icon: Users,
