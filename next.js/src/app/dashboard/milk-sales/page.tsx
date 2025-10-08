@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,46 +9,49 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, DollarSign } from "lucide-react"
-import Link from "next/link"
-import { formatDate, formatCurrency } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { DollarSign, Eye, Pencil, Plus } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function MilkSalesPage() {
-  const [milkSales, setMilkSales] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [milkSales, setMilkSales] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMilkSales()
-  }, [])
+    fetchMilkSales();
+  }, []);
 
   const fetchMilkSales = async () => {
     try {
-      const response = await fetch("/api/milk-sales")
+      const response = await fetch("/api/milk-sales");
       if (response.ok) {
-        const data = await response.json()
-        setMilkSales(data)
+        const data = await response.json();
+        setMilkSales(data);
       }
     } catch (error) {
-      console.error("Failed to fetch milk sales:", error)
+      console.error("Failed to fetch milk sales:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getPaymentBadge = (status: string) => {
     const colors: any = {
       PENDING: "bg-yellow-100 text-yellow-800",
       PAID: "bg-green-100 text-green-800",
-      OVERDUE: "bg-red-100 text-red-800"
-    }
+      OVERDUE: "bg-red-100 text-red-800",
+    };
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}
+      >
         {status}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -84,6 +86,7 @@ export default function MilkSalesPage() {
                 <TableHead>Total Amount</TableHead>
                 <TableHead>Buyer</TableHead>
                 <TableHead>Payment Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -92,9 +95,25 @@ export default function MilkSalesPage() {
                   <TableCell>{formatDate(sale.saleDate)}</TableCell>
                   <TableCell>{sale.quantity} L</TableCell>
                   <TableCell>{formatCurrency(sale.pricePerLiter)}</TableCell>
-                  <TableCell className="font-medium">{formatCurrency(sale.totalAmount)}</TableCell>
+                  <TableCell className="font-medium">
+                    {formatCurrency(sale.totalAmount)}
+                  </TableCell>
                   <TableCell>{sale.buyer || "N/A"}</TableCell>
                   <TableCell>{getPaymentBadge(sale.paymentStatus)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/milk-sales/${sale.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/milk-sales/${sale.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -102,6 +121,5 @@ export default function MilkSalesPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-
