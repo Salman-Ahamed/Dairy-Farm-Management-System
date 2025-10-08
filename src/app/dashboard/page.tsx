@@ -313,7 +313,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <CardContent className="grid grid-cols-1 gap-3">
             <Link href="/dashboard/milk/new">
               <Button
                 variant="outline"
