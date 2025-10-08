@@ -7,10 +7,12 @@
 ### 1. Node.js ইনস্টল করুন
 
 **Windows:**
+
 - [Node.js ডাউনলোড করুন](https://nodejs.org/) (LTS version)
 - ইনস্টলার রান করুন এবং ডিফল্ট সেটিংস রাখুন
 
 **Verify Installation:**
+
 ```bash
 node --version
 npm --version
@@ -21,6 +23,7 @@ npm --version
 **Option A: Local MySQL**
 
 Windows:
+
 - [MySQL Installer ডাউনলোড করুন](https://dev.mysql.com/downloads/installer/)
 - MySQL Server 8.0 ইনস্টল করুন
 - Password সেট করুন (মনে রাখুন!)
@@ -28,6 +31,7 @@ Windows:
 **Option B: Cloud Database (সহজ পদ্ধতি)**
 
 [PlanetScale](https://planetscale.com/) ব্যবহার করুন (ফ্রি):
+
 1. PlanetScale account তৈরি করুন
 2. নতুন database তৈরি করুন
 3. Connection string কপি করুন
@@ -57,11 +61,13 @@ npm install
 1. `.env.example` ফাইল কপি করুন এবং `.env` নাম দিন:
 
 **Windows CMD:**
+
 ```cmd
 copy .env.example .env
 ```
 
 **PowerShell:**
+
 ```powershell
 Copy-Item .env.example .env
 ```
@@ -80,11 +86,13 @@ NEXTAUTH_URL="http://localhost:3000"
 ```
 
 **DATABASE_URL ফরম্যাট:**
+
 ```
 mysql://[username]:[password]@[host]:[port]/[database_name]
 ```
 
 উদাহরণ:
+
 - Username: `root`
 - Password: `mypassword123`
 - Host: `localhost`
@@ -147,6 +155,7 @@ npm run dev
 ```
 
 এটি দেখাবে:
+
 ```
 ▲ Next.js 14.0.4
 - Local:        http://localhost:3000
@@ -206,6 +215,7 @@ npm run dev
 **Error:** `Can't reach database server`
 
 **সমাধান:**
+
 1. MySQL service চালু আছে কিনা চেক করুন
 2. `.env` ফাইলে DATABASE_URL সঠিক আছে কিনা চেক করুন
 3. Database তৈরি হয়েছে কিনা চেক করুন
@@ -215,12 +225,14 @@ npm run dev
 **সমাধান:**
 
 **Windows:**
+
 ```cmd
 netstat -ano | findstr :3000
 taskkill /PID [PID_NUMBER] /F
 ```
 
 অথবা অন্য port ব্যবহার করুন:
+
 ```bash
 npm run dev -- -p 3001
 ```
@@ -228,6 +240,7 @@ npm run dev -- -p 3001
 ### Prisma Generate Error
 
 **সমাধান:**
+
 ```bash
 rm -rf node_modules
 npm install
@@ -237,6 +250,7 @@ npx prisma generate
 ### Module Not Found Errors
 
 **সমাধান:**
+
 ```bash
 npm install
 ```
@@ -254,6 +268,7 @@ npm install
 ### Environment Variables (Production)
 
 Production এ এই variables প্রয়োজন:
+
 ```env
 DATABASE_URL="your-production-database-url"
 NEXTAUTH_URL="https://your-domain.com"
@@ -286,4 +301,3 @@ NEXTAUTH_SECRET="different-secret-for-production"
 ---
 
 Happy Coding! 🚀🐄
-
