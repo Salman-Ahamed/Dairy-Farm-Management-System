@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,47 +9,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, Users } from "lucide-react"
-import Link from "next/link"
-import { formatDate, formatCurrency } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Eye, Pencil, Plus, Users } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEmployees()
-  }, [])
+    fetchEmployees();
+  }, []);
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch("/api/employees")
+      const response = await fetch("/api/employees");
       if (response.ok) {
-        const data = await response.json()
-        setEmployees(data)
+        const data = await response.json();
+        setEmployees(data);
       }
     } catch (error) {
-      console.error("Failed to fetch employees:", error)
+      console.error("Failed to fetch employees:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const colors: any = {
       ACTIVE: "bg-green-100 text-green-800",
       INACTIVE: "bg-gray-100 text-gray-800",
       TERMINATED: "bg-red-100 text-red-800",
-      RESIGNED: "bg-blue-100 text-blue-800"
-    }
+      RESIGNED: "bg-blue-100 text-blue-800",
+    };
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}
+      >
         {status}
       </span>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -86,18 +88,35 @@ export default function EmployeesPage() {
                 <TableHead>Salary</TableHead>
                 <TableHead>Joining Date</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {employees.map((employee: any) => (
                 <TableRow key={employee.id}>
-                  <TableCell className="font-medium">{employee.employeeId}</TableCell>
+                  <TableCell className="font-medium">
+                    {employee.employeeId}
+                  </TableCell>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.position}</TableCell>
                   <TableCell>{employee.department || "N/A"}</TableCell>
                   <TableCell>{formatCurrency(employee.salary)}</TableCell>
                   <TableCell>{formatDate(employee.dateOfJoining)}</TableCell>
                   <TableCell>{getStatusBadge(employee.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/employees/${employee.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/employees/${employee.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -105,6 +124,5 @@ export default function EmployeesPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-

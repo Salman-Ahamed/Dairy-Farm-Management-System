@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,42 +9,58 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, Wallet, TrendingUp, TrendingDown } from "lucide-react"
-import Link from "next/link"
-import { formatDate, formatCurrency } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import {
+  Eye,
+  Pencil,
+  Plus,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function FinancePage() {
-  const [financeRecords, setFinanceRecords] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState({ totalIncome: 0, totalExpense: 0, balance: 0 })
+  const [financeRecords, setFinanceRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalIncome: 0,
+    totalExpense: 0,
+    balance: 0,
+  });
 
   useEffect(() => {
-    fetchFinanceRecords()
-  }, [])
+    fetchFinanceRecords();
+  }, []);
 
   const fetchFinanceRecords = async () => {
     try {
-      const response = await fetch("/api/finance")
+      const response = await fetch("/api/finance");
       if (response.ok) {
-        const data = await response.json()
-        setFinanceRecords(data)
-        
+        const data = await response.json();
+        setFinanceRecords(data);
+
         // Calculate stats
-        const income = data.filter((r: any) => r.type === "INCOME").reduce((sum: number, r: any) => sum + r.amount, 0)
-        const expense = data.filter((r: any) => r.type === "EXPENSE").reduce((sum: number, r: any) => sum + r.amount, 0)
+        const income = data
+          .filter((r: any) => r.type === "INCOME")
+          .reduce((sum: number, r: any) => sum + r.amount, 0);
+        const expense = data
+          .filter((r: any) => r.type === "EXPENSE")
+          .reduce((sum: number, r: any) => sum + r.amount, 0);
         setStats({
           totalIncome: income,
           totalExpense: expense,
-          balance: income - expense
-        })
+          balance: income - expense,
+        });
       }
     } catch (error) {
-      console.error("Failed to fetch finance records:", error)
+      console.error("Failed to fetch finance records:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -69,17 +84,23 @@ export default function FinancePage() {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {formatCurrency(stats.totalIncome)}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Expenses
+            </CardTitle>
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpense)}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {formatCurrency(stats.totalExpense)}
+            </div>
           </CardContent>
         </Card>
 
@@ -89,7 +110,11 @@ export default function FinancePage() {
             <Wallet className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+            <div
+              className={`text-2xl font-bold ${
+                stats.balance >= 0 ? "text-blue-600" : "text-red-600"
+              }`}
+            >
               {formatCurrency(stats.balance)}
             </div>
           </CardContent>
@@ -114,6 +139,7 @@ export default function FinancePage() {
                 <TableHead>Description</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Payment Method</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,20 +147,43 @@ export default function FinancePage() {
                 <TableRow key={record.id}>
                   <TableCell>{formatDate(record.date)}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      record.type === "INCOME" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        record.type === "INCOME"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
                       {record.type}
                     </span>
                   </TableCell>
                   <TableCell>{record.category}</TableCell>
                   <TableCell>{record.description}</TableCell>
-                  <TableCell className={`font-medium ${
-                    record.type === "INCOME" ? "text-green-600" : "text-red-600"
-                  }`}>
-                    {record.type === "INCOME" ? "+" : "-"}{formatCurrency(record.amount)}
+                  <TableCell
+                    className={`font-medium ${
+                      record.type === "INCOME"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {record.type === "INCOME" ? "+" : "-"}
+                    {formatCurrency(record.amount)}
                   </TableCell>
                   <TableCell>{record.paymentMethod || "N/A"}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/finance/${record.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/finance/${record.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -142,6 +191,5 @@ export default function FinancePage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-
