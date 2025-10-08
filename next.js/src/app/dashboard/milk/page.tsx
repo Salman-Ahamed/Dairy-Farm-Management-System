@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,39 +9,42 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, Milk } from "lucide-react"
-import Link from "next/link"
-import { formatDate } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatDate } from "@/lib/utils";
+import { Eye, Milk, Pencil, Plus } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function MilkPage() {
-  const [milkRecords, setMilkRecords] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [milkRecords, setMilkRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMilkRecords()
-  }, [])
+    fetchMilkRecords();
+  }, []);
 
   const fetchMilkRecords = async () => {
     try {
-      const response = await fetch("/api/milk")
+      const response = await fetch("/api/milk");
       if (response.ok) {
-        const data = await response.json()
-        setMilkRecords(data)
+        const data = await response.json();
+        setMilkRecords(data);
       }
     } catch (error) {
-      console.error("Failed to fetch milk records:", error)
+      console.error("Failed to fetch milk records:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Milk Production</h1>
-          <p className="text-gray-500 mt-1">Track daily milk production records</p>
+          <p className="text-gray-500 mt-1">
+            Track daily milk production records
+          </p>
         </div>
         <Link href="/dashboard/milk/new">
           <Button>
@@ -71,18 +73,37 @@ export default function MilkPage() {
                 <TableHead>Evening (L)</TableHead>
                 <TableHead>Total (L)</TableHead>
                 <TableHead>Quality</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {milkRecords.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell className="font-medium">{record.animal.tagNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {record.animal.tagNumber}
+                  </TableCell>
                   <TableCell>{formatDate(record.date)}</TableCell>
                   <TableCell>{record.morningYield || "0"}</TableCell>
                   <TableCell>{record.afternoonYield || "0"}</TableCell>
                   <TableCell>{record.eveningYield || "0"}</TableCell>
-                  <TableCell className="font-medium">{record.totalYield}</TableCell>
+                  <TableCell className="font-medium">
+                    {record.totalYield}
+                  </TableCell>
                   <TableCell>{record.quality}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/milk/${record.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/milk/${record.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -90,6 +111,5 @@ export default function MilkPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-
