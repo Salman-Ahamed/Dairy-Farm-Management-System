@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import {
   Beef,
+  Clock,
   DollarSign,
   Heart,
   Milk,
@@ -11,6 +12,16 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+
+function getTimeAgo(date: Date) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return "Just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return `${Math.floor(seconds / 604800)}w ago`;
+}
 
 async function getDashboardStats() {
   const [
@@ -78,8 +89,75 @@ async function getDashboardStats() {
   };
 }
 
+async function getRecentActivities() {
+  const [
+    recentMilkRecords,
+    recentMilkSales,
+    recentHealthRecords,
+    recentAnimals,
+  ] = await Promise.all([
+    prisma.milkRecord.findMany({
+      take: 3,
+      orderBy: { createdAt: "desc" },
+      include: { animal: true },
+    }),
+    prisma.milkSale.findMany({
+      take: 3,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.animalHealth.findMany({
+      take: 2,
+      orderBy: { createdAt: "desc" },
+      include: { animal: true },
+    }),
+    prisma.animal.findMany({
+      take: 2,
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  // Combine and sort all activities
+  const activities = [
+    ...recentMilkRecords.map((record) => ({
+      type: "milk_production",
+      title: `Milk Production: ${record.animal.tagNumber}`,
+      description: `${record.totalYield}L recorded`,
+      time: record.createdAt,
+      icon: "milk",
+    })),
+    ...recentMilkSales.map((sale) => ({
+      type: "milk_sale",
+      title: `Milk Sale: ${sale.buyer || "Customer"}`,
+      description: `${sale.quantity}L - ৳${sale.totalAmount}`,
+      time: sale.createdAt,
+      icon: "sale",
+    })),
+    ...recentHealthRecords.map((health) => ({
+      type: "health",
+      title: `Health Check: ${health.animal.tagNumber}`,
+      description: health.disease || "General checkup",
+      time: health.createdAt,
+      icon: "health",
+    })),
+    ...recentAnimals.map((animal) => ({
+      type: "animal",
+      title: `New Animal: ${animal.tagNumber}`,
+      description: `${animal.breed} - ${animal.gender}`,
+      time: animal.createdAt,
+      icon: "animal",
+    })),
+  ]
+    .sort((a, b) => b.time.getTime() - a.time.getTime())
+    .slice(0, 5);
+
+  return activities;
+}
+
 export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+  const [stats, recentActivities] = await Promise.all([
+    getDashboardStats(),
+    getRecentActivities(),
+  ]);
 
   const statCards = [
     {
@@ -165,9 +243,52 @@ export default async function DashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-muted-foreground">
-              No recent activity to display
-            </div>
+            {recentActivities.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No recent activity to display
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentActivities.map((activity, index) => {
+                  const getIcon = () => {
+                    switch (activity.icon) {
+                      case "milk":
+                        return <Milk className="h-4 w-4 text-blue-600" />;
+                      case "sale":
+                        return (
+                          <DollarSign className="h-4 w-4 text-green-600" />
+                        );
+                      case "health":
+                        return <Heart className="h-4 w-4 text-red-600" />;
+                      case "animal":
+                        return <Beef className="h-4 w-4 text-purple-600" />;
+                      default:
+                        return <Clock className="h-4 w-4 text-gray-600" />;
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="mt-0.5">{getIcon()}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {activity.title}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {activity.description}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
+                        {getTimeAgo(activity.time)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
