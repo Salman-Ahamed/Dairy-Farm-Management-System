@@ -8,6 +8,7 @@ import {
   Heart,
   Milk,
   PackageCheck,
+  ShoppingCart,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -95,6 +96,7 @@ async function getRecentActivities() {
     recentMilkSales,
     recentHealthRecords,
     recentAnimals,
+    recentStockFeed,
   ] = await Promise.all([
     prisma.milkRecord.findMany({
       take: 3,
@@ -111,6 +113,10 @@ async function getRecentActivities() {
       include: { animal: true },
     }),
     prisma.animal.findMany({
+      take: 2,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.stockFeed.findMany({
       take: 2,
       orderBy: { createdAt: "desc" },
     }),
@@ -145,6 +151,13 @@ async function getRecentActivities() {
       description: `${animal.breed} - ${animal.gender}`,
       time: animal.createdAt,
       icon: "animal",
+    })),
+    ...recentStockFeed.map((feed) => ({
+      type: "stock_feed",
+      title: `Stock Feed: ${feed.feedName}`,
+      description: `${feed.quantity}${feed.unit} - ৳${feed.totalCost}`,
+      time: feed.createdAt,
+      icon: "feed",
     })),
   ]
     .sort((a, b) => b.time.getTime() - a.time.getTime())
@@ -262,6 +275,10 @@ export default async function DashboardPage() {
                         return <Heart className="h-4 w-4 text-red-600" />;
                       case "animal":
                         return <Beef className="h-4 w-4 text-purple-600" />;
+                      case "feed":
+                        return (
+                          <ShoppingCart className="h-4 w-4 text-orange-600" />
+                        );
                       default:
                         return <Clock className="h-4 w-4 text-gray-600" />;
                     }
