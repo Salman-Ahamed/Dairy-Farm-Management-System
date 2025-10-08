@@ -1,19 +1,19 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth"
-import Sidebar from "@/components/layout/Sidebar"
-import Header from "@/components/layout/Header"
-import { Providers } from "./providers"
+import Header from "@/components/layout/Header";
+import Sidebar from "@/components/layout/Sidebar";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { Providers } from "./providers";
 
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/login")
+    redirect("/login");
   }
 
   return (
@@ -28,6 +28,5 @@ export default async function DashboardLayout({
         </div>
       </div>
     </Providers>
-  )
+  );
 }
-
