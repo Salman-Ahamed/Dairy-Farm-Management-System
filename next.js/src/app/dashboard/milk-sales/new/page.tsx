@@ -17,12 +17,23 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface Customer {
+  id: string;
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  defaultPricePerLiter?: number | null;
+  totalPurchases: number;
+}
+
 export default function NewMilkSalePage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     saleDate: new Date().toISOString().split("T")[0],
     quantity: "",
@@ -51,7 +62,7 @@ export default function NewMilkSalePage() {
   };
 
   const handleCustomerSelect = (customerId: string) => {
-    const customer = customers.find((c: any) => c.id === customerId);
+    const customer = customers.find((c) => c.id === customerId);
     if (customer) {
       setSelectedCustomer(customer);
       setFormData({
@@ -194,7 +205,7 @@ export default function NewMilkSalePage() {
                     <SelectValue placeholder="Select a customer (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    {customers.map((customer: any) => (
+                    {customers.map((customer) => (
                       <SelectItem key={customer.id} value={customer.id}>
                         {customer.name}
                         {customer.defaultPricePerLiter &&
