@@ -49,6 +49,7 @@ export async function PUT(
     const quantity = parseFloat(data.quantity);
     const pricePerLiter = parseFloat(data.pricePerLiter);
     const totalAmount = quantity * pricePerLiter;
+    const newAmountPaid = parseFloat(data.amountPaid || 0);
     const newPaymentStatus = data.paymentStatus || "PENDING";
 
     // Get the old milk sale to check previous payment status
@@ -68,6 +69,11 @@ export async function PUT(
     // Calculate quantity difference for customer update
     const quantityDiff = quantity - oldMilkSale.quantity;
 
+    // Calculate balance change
+    const oldBalanceEffect = oldMilkSale.amountPaid - oldMilkSale.totalAmount;
+    const newBalanceEffect = newAmountPaid - totalAmount;
+    const balanceChange = newBalanceEffect - oldBalanceEffect;
+
     // Update milk sale
     const milkSale = await prisma.milkSale.update({
       where: { id: params.id },
@@ -77,6 +83,7 @@ export async function PUT(
         quantity,
         pricePerLiter,
         totalAmount,
+        amountPaid: newAmountPaid,
         buyer: data.buyer || null,
         paymentStatus: newPaymentStatus,
         paymentMethod: data.paymentMethod || null,
@@ -84,13 +91,16 @@ export async function PUT(
       },
     });
 
-    // Update customer's total purchases if quantity changed
-    if (data.customerId && quantityDiff !== 0) {
+    // Update customer's total purchases and balance if customer exists
+    if (data.customerId) {
       await prisma.customer.update({
         where: { id: data.customerId },
         data: {
           totalPurchases: {
             increment: quantityDiff,
+          },
+          balance: {
+            increment: balanceChange,
           },
         },
       });
@@ -112,7 +122,7 @@ export async function PUT(
           description: `Milk sale to ${
             data.buyer || "customer"
           } - ${quantity}L @ ${pricePerLiter}/L`,
-          amount: totalAmount,
+          amount: newAmountPaid,
           paymentMethod: data.paymentMethod || null,
           referenceNumber: `MILK-SALE-${params.id}`,
           notes: data.notes || null,
@@ -135,7 +145,7 @@ export async function PUT(
             description: `Milk sale to ${
               data.buyer || "customer"
             } - ${quantity}L @ ${pricePerLiter}/L`,
-            amount: totalAmount,
+            amount: newAmountPaid,
             paymentMethod: data.paymentMethod || null,
             notes: data.notes || null,
           },
@@ -164,7 +174,36 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find and delete the corresponding finance record first
+    // Get the milk sale to reverse balance changes
+    const milkSale = await prisma.milkSale.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!milkSale) {
+      return NextResponse.json(
+        { error: "Milk sale not found" },
+        { status: 404 }
+      );
+    }
+
+    // Reverse customer balance and total purchases
+    if (milkSale.customerId) {
+      const balanceReversal = milkSale.amountPaid - milkSale.totalAmount;
+
+      await prisma.customer.update({
+        where: { id: milkSale.customerId },
+        data: {
+          totalPurchases: {
+            decrement: milkSale.quantity,
+          },
+          balance: {
+            decrement: balanceReversal,
+          },
+        },
+      });
+    }
+
+    // Find and delete the corresponding finance record
     const financeRecord = await prisma.finance.findFirst({
       where: { referenceNumber: `MILK-SALE-${params.id}` },
     });

@@ -27,7 +27,9 @@ export default function EditMilkSalePage() {
     saleDate: "",
     quantity: "",
     pricePerLiter: "",
+    amountPaid: "",
     buyer: "",
+    customerId: "",
     paymentStatus: "PENDING",
     paymentMethod: "",
     notes: "",
@@ -35,6 +37,7 @@ export default function EditMilkSalePage() {
 
   useEffect(() => {
     fetchSale();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSale = async () => {
@@ -46,7 +49,9 @@ export default function EditMilkSalePage() {
           saleDate: data.saleDate.split("T")[0],
           quantity: data.quantity?.toString() || "",
           pricePerLiter: data.pricePerLiter?.toString() || "",
+          amountPaid: data.amountPaid?.toString() || "0",
           buyer: data.buyer || "",
+          customerId: data.customerId || "",
           paymentStatus: data.paymentStatus,
           paymentMethod: data.paymentMethod || "",
           notes: data.notes || "",
@@ -57,6 +62,18 @@ export default function EditMilkSalePage() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const calculateTotalAmount = () => {
+    const quantity = parseFloat(formData.quantity) || 0;
+    const pricePerLiter = parseFloat(formData.pricePerLiter) || 0;
+    return quantity * pricePerLiter;
+  };
+
+  const calculateBalanceChange = () => {
+    const totalAmount = calculateTotalAmount();
+    const amountPaid = parseFloat(formData.amountPaid) || 0;
+    return amountPaid - totalAmount;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -190,6 +207,23 @@ export default function EditMilkSalePage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="amountPaid">Amount Paid (৳)</Label>
+                <Input
+                  id="amountPaid"
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount actually paid"
+                  value={formData.amountPaid}
+                  onChange={(e) =>
+                    setFormData({ ...formData, amountPaid: e.target.value })
+                  }
+                />
+                <p className="text-xs text-gray-500">
+                  Leave empty or 0 for pending payment
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="paymentMethod">Payment Method</Label>
                 <Input
                   id="paymentMethod"
@@ -201,6 +235,47 @@ export default function EditMilkSalePage() {
                 />
               </div>
             </div>
+
+            {/* Summary Section */}
+            {formData.quantity && formData.pricePerLiter && (
+              <div className="rounded-lg border bg-gray-50 p-4 space-y-2">
+                <h4 className="font-semibold text-gray-900">Summary</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Amount:</span>
+                    <span className="font-semibold">
+                      ৳{calculateTotalAmount().toFixed(2)}
+                    </span>
+                  </div>
+                  {formData.amountPaid && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Amount Paid:</span>
+                        <span className="font-semibold">
+                          ৳{parseFloat(formData.amountPaid).toFixed(2)}
+                        </span>
+                      </div>
+                      <div
+                        className={`flex justify-between pt-2 border-t ${
+                          calculateBalanceChange() >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="font-semibold">
+                          {calculateBalanceChange() >= 0
+                            ? "Advance/Credit:"
+                            : "Due/Pending:"}
+                        </span>
+                        <span className="font-bold">
+                          ৳{Math.abs(calculateBalanceChange()).toFixed(2)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>

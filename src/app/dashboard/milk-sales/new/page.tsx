@@ -24,6 +24,7 @@ interface Customer {
   email?: string | null;
   defaultPricePerLiter?: number | null;
   totalPurchases: number;
+  balance: number;
 }
 
 export default function NewMilkSalePage() {
@@ -37,7 +38,8 @@ export default function NewMilkSalePage() {
   const [formData, setFormData] = useState({
     saleDate: new Date().toISOString().split("T")[0],
     quantity: "",
-    pricePerLiter: "",
+    pricePerLiter: "80",
+    amountPaid: "",
     buyer: "",
     customerId: "",
     paymentStatus: "PENDING",
@@ -48,6 +50,33 @@ export default function NewMilkSalePage() {
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  // Auto-update payment status based on payment calculation
+  useEffect(() => {
+    const totalAmount = calculateTotalAmount();
+    const autoPayment = getAutoPaymentFromBalance();
+    const manualPayment = parseFloat(formData.amountPaid) || 0;
+    const totalPaid = autoPayment + manualPayment;
+
+    // Auto-update payment status
+    if (totalAmount > 0 && totalPaid >= totalAmount) {
+      // Fully paid
+      if (formData.paymentStatus !== "PAID") {
+        setFormData((prev) => ({ ...prev, paymentStatus: "PAID" }));
+      }
+    } else if (totalPaid > 0 && totalPaid < totalAmount) {
+      // Partially paid - keep as PENDING
+      if (formData.paymentStatus === "PAID") {
+        setFormData((prev) => ({ ...prev, paymentStatus: "PENDING" }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formData.quantity,
+    formData.pricePerLiter,
+    formData.amountPaid,
+    selectedCustomer?.balance,
+  ]);
 
   const fetchCustomers = async () => {
     try {
@@ -71,6 +100,7 @@ export default function NewMilkSalePage() {
         buyer: customer.name,
         pricePerLiter:
           customer.defaultPricePerLiter?.toString() || formData.pricePerLiter,
+        amountPaid: "", // Will be calculated based on balance
       });
     }
   };
@@ -80,22 +110,66 @@ export default function NewMilkSalePage() {
     setSelectedCustomer(null);
   };
 
+  const calculateTotalAmount = () => {
+    const quantity = parseFloat(formData.quantity) || 0;
+    const pricePerLiter = parseFloat(formData.pricePerLiter) || 0;
+    return quantity * pricePerLiter;
+  };
+
+  const calculateBalanceChange = () => {
+    const totalAmount = calculateTotalAmount();
+    const amountPaid = parseFloat(formData.amountPaid) || 0;
+    return amountPaid - totalAmount;
+  };
+
+  const getAutoPaymentFromBalance = () => {
+    if (!selectedCustomer || selectedCustomer.balance <= 0) return 0;
+    const totalAmount = calculateTotalAmount();
+    // Use customer's balance up to the total amount
+    return Math.min(selectedCustomer.balance, totalAmount);
+  };
+
+  const getRemainingAmount = () => {
+    const totalAmount = calculateTotalAmount();
+    const autoPayment = getAutoPaymentFromBalance();
+    const manualPayment = parseFloat(formData.amountPaid) || 0;
+    return totalAmount - autoPayment - manualPayment;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const autoPayment = getAutoPaymentFromBalance();
+      const manualPayment = parseFloat(formData.amountPaid) || 0;
+
+      // Send only manual payment, backend will calculate auto-payment
+      const submissionData = {
+        ...formData,
+        amountPaid: manualPayment, // Only manual payment
+        autoPayment: autoPayment, // Send auto-payment separately for backend
+      };
+
       const response = await fetch("/api/milk-sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       if (!response.ok) throw new Error();
 
+      const totalPaid = autoPayment + manualPayment;
       toast({
         title: "Success",
-        description: "Milk sale recorded successfully",
+        description:
+          autoPayment > 0
+            ? `Milk sale recorded! ৳${autoPayment.toFixed(
+                2
+              )} auto-paid from credit${
+                manualPayment > 0 ? ` + ৳${manualPayment.toFixed(2)} cash` : ""
+              }.`
+            : "Milk sale recorded successfully",
       });
       router.push("/dashboard/milk-sales");
     } catch (error) {
@@ -124,7 +198,24 @@ export default function NewMilkSalePage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-purple-200 bg-purple-50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-purple-900">
+                  💰 Auto Balance Payment
+                </p>
+                <p className="text-sm text-purple-700 mt-1">
+                  Customer&apos;s existing <strong>credit/advance</strong> will
+                  be <strong>automatically applied</strong> to this sale!
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
@@ -210,6 +301,12 @@ export default function NewMilkSalePage() {
                         {customer.name}
                         {customer.defaultPricePerLiter &&
                           ` - ${customer.defaultPricePerLiter}৳/L`}
+                        {customer.balance > 0 &&
+                          ` 💰 (Credit: ৳${customer.balance.toFixed(0)})`}
+                        {customer.balance < 0 &&
+                          ` ⚠️ (Due: ৳${Math.abs(customer.balance).toFixed(
+                            0
+                          )})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -239,15 +336,38 @@ export default function NewMilkSalePage() {
                   onChange={(e) => handleBuyerNameChange(e.target.value)}
                 />
                 {selectedCustomer && (
-                  <p className="text-sm text-green-600">
-                    ✓ Using default price:{" "}
-                    {selectedCustomer.defaultPricePerLiter}৳/L
-                  </p>
+                  <div className="space-y-1">
+                    {selectedCustomer.defaultPricePerLiter && (
+                      <p className="text-sm text-green-600">
+                        ✓ Using default price:{" "}
+                        {selectedCustomer.defaultPricePerLiter}৳/L
+                      </p>
+                    )}
+                    {selectedCustomer.balance > 0 && (
+                      <p className="text-sm text-blue-600 font-semibold">
+                        💰 Available Credit: ৳
+                        {selectedCustomer.balance.toFixed(2)}
+                      </p>
+                    )}
+                    {selectedCustomer.balance < 0 && (
+                      <p className="text-sm text-red-600 font-semibold">
+                        ⚠️ Pending Due: ৳
+                        {Math.abs(selectedCustomer.balance).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="paymentStatus">Payment Status</Label>
+                <Label htmlFor="paymentStatus">
+                  Payment Status
+                  {getRemainingAmount() <= 0 && formData.quantity && (
+                    <span className="text-green-600 text-xs ml-2">
+                      ✓ Auto-updated
+                    </span>
+                  )}
+                </Label>
                 <Select
                   value={formData.paymentStatus}
                   onValueChange={(value) =>
@@ -263,6 +383,13 @@ export default function NewMilkSalePage() {
                     <SelectItem value="OVERDUE">Overdue</SelectItem>
                   </SelectContent>
                 </Select>
+                {formData.paymentStatus === "PAID" &&
+                  getRemainingAmount() <= 0 &&
+                  formData.quantity && (
+                    <p className="text-xs text-green-600">
+                      ✓ Status automatically set to PAID (fully paid)
+                    </p>
+                  )}
               </div>
 
               <div className="space-y-2">
@@ -276,7 +403,95 @@ export default function NewMilkSalePage() {
                   }
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="amountPaid">
+                  Additional Payment (৳)
+                  {selectedCustomer && selectedCustomer.balance > 0 && (
+                    <span className="text-blue-600 text-xs ml-2">
+                      (Credit will be auto-applied)
+                    </span>
+                  )}
+                </Label>
+                <Input
+                  id="amountPaid"
+                  type="number"
+                  step="0.01"
+                  placeholder="Additional cash payment (optional)"
+                  value={formData.amountPaid}
+                  onChange={(e) =>
+                    setFormData({ ...formData, amountPaid: e.target.value })
+                  }
+                />
+                <p className="text-xs text-gray-500">
+                  {selectedCustomer && selectedCustomer.balance > 0
+                    ? "Enter only if customer pays extra cash"
+                    : "Amount actually paid by customer"}
+                </p>
+              </div>
             </div>
+
+            {/* Summary Section */}
+            {formData.quantity && formData.pricePerLiter && (
+              <div className="rounded-lg border bg-gray-50 p-4 space-y-2">
+                <h4 className="font-semibold text-gray-900">Payment Summary</h4>
+                <div className="space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Amount:</span>
+                    <span className="font-semibold">
+                      ৳{calculateTotalAmount().toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Auto-payment from balance */}
+                  {selectedCustomer && selectedCustomer.balance > 0 && (
+                    <div className="flex justify-between text-blue-600">
+                      <span className="font-medium">
+                        Auto-paid from Credit:
+                      </span>
+                      <span className="font-semibold">
+                        -৳{getAutoPaymentFromBalance().toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Manual payment */}
+                  {formData.amountPaid &&
+                    parseFloat(formData.amountPaid) > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span className="font-medium">Additional Payment:</span>
+                        <span className="font-semibold">
+                          -৳{parseFloat(formData.amountPaid).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+
+                  {/* Remaining amount */}
+                  <div
+                    className={`flex justify-between pt-2 border-t font-bold ${
+                      getRemainingAmount() > 0
+                        ? "text-red-600"
+                        : getRemainingAmount() < 0
+                        ? "text-green-600"
+                        : "text-gray-900"
+                    }`}
+                  >
+                    <span>
+                      {getRemainingAmount() > 0
+                        ? "Remaining Due:"
+                        : getRemainingAmount() < 0
+                        ? "New Advance:"
+                        : "Status:"}
+                    </span>
+                    <span>
+                      {getRemainingAmount() === 0
+                        ? "Fully Paid ✓"
+                        : `৳${Math.abs(getRemainingAmount()).toFixed(2)}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>

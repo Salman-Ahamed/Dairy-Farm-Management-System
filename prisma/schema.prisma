@@ -207,6 +207,7 @@ model Customer {
   defaultPricePerLiter Float?
   lastPurchaseDate     DateTime?
   totalPurchases       Float     @default(0)
+  balance              Float     @default(0) // Positive = advance/credit, Negative = due/pending
   notes                String?   @db.Text
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
@@ -227,6 +228,7 @@ model MilkSale {
   quantity      Float
   pricePerLiter Float
   totalAmount   Float
+  amountPaid    Float         @default(0) // Amount actually paid by customer
   buyer         String?
   paymentStatus PaymentStatus @default(PENDING)
   paymentMethod String?

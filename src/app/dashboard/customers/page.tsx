@@ -1,14 +1,15 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
 import { Eye, Pencil, Plus, Users } from "lucide-react";
@@ -69,41 +70,69 @@ export default function CustomersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Default Price/L</TableHead>
                 <TableHead>Total Purchases</TableHead>
+                <TableHead>Balance</TableHead>
                 <TableHead>Total Sales</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer: any) => (
-                <TableRow key={customer.id}>
-                  <TableCell className="font-medium">{customer.name}</TableCell>
-                  <TableCell>{customer.phone || "N/A"}</TableCell>
-                  <TableCell>{customer.email || "N/A"}</TableCell>
-                  <TableCell>
-                    {customer.defaultPricePerLiter
-                      ? formatCurrency(customer.defaultPricePerLiter)
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    {customer.totalPurchases.toFixed(1)} L
-                  </TableCell>
-                  <TableCell>{customer._count.milkSales} sales</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Link href={`/dashboard/customers/${customer.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Link href={`/dashboard/customers/${customer.id}/edit`}>
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {customers.map((customer: any) => {
+                const balance = customer.balance || 0;
+                const isPositive = balance > 0;
+                const isNegative = balance < 0;
+
+                return (
+                  <TableRow key={customer.id}>
+                    <TableCell className="font-medium">
+                      {customer.name}
+                    </TableCell>
+                    <TableCell>{customer.phone || "N/A"}</TableCell>
+                    <TableCell>{customer.email || "N/A"}</TableCell>
+                    <TableCell>
+                      {customer.defaultPricePerLiter
+                        ? formatCurrency(customer.defaultPricePerLiter)
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {customer.totalPurchases.toFixed(1)} L
+                    </TableCell>
+                    <TableCell>
+                      {balance === 0 ? (
+                        <span className="text-gray-500">৳0.00</span>
+                      ) : isPositive ? (
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200"
+                        >
+                          +৳{balance.toFixed(2)}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="bg-red-50 text-red-700 border-red-200"
+                        >
+                          -৳{Math.abs(balance).toFixed(2)}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>{customer._count.milkSales} sales</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Link href={`/dashboard/customers/${customer.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Link href={`/dashboard/customers/${customer.id}/edit`}>
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
@@ -111,4 +140,3 @@ export default function CustomersPage() {
     </div>
   );
 }
-

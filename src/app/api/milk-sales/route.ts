@@ -36,9 +36,13 @@ export async function POST(request: Request) {
     const quantity = parseFloat(data.quantity);
     const pricePerLiter = parseFloat(data.pricePerLiter);
     const totalAmount = quantity * pricePerLiter;
+    const manualPayment = parseFloat(data.amountPaid || 0); // Cash payment
+    const autoPayment = parseFloat(data.autoPayment || 0); // Credit used
+    const totalPaid = manualPayment + autoPayment;
     const paymentStatus = data.paymentStatus || "PENDING";
 
     let customerId = data.customerId;
+    let isNewCustomer = false;
 
     // If buyer name is provided but no customerId, create or find customer
     if (data.buyer && !customerId) {
@@ -57,8 +61,10 @@ export async function POST(request: Request) {
             defaultPricePerLiter: pricePerLiter,
             lastPurchaseDate: new Date(data.saleDate),
             totalPurchases: quantity,
+            balance: manualPayment - totalAmount, // Initial balance (only cash payment)
           },
         });
+        isNewCustomer = true;
       }
 
       customerId = customer.id;
@@ -72,6 +78,7 @@ export async function POST(request: Request) {
         quantity,
         pricePerLiter,
         totalAmount,
+        amountPaid: totalPaid, // Store total paid (manual + auto)
         buyer: data.buyer || null,
         paymentStatus,
         paymentMethod: data.paymentMethod || null,
@@ -79,8 +86,17 @@ export async function POST(request: Request) {
       },
     });
 
-    // Update customer's last purchase date and total purchases if customer already existed
-    if (customerId && data.customerId) {
+    // Update customer's last purchase date, total purchases, and balance
+    // Skip balance update for newly created customers (already set during creation)
+    if (customerId && !isNewCustomer) {
+      // Balance change calculation:
+      // - Deduct credit used (autoPayment)
+      // - Add new cash payment (manualPayment)
+      // - Subtract total amount owed
+      // Net: manualPayment - autoPayment - (totalAmount - autoPayment)
+      //    = manualPayment - totalAmount
+      const balanceChange = manualPayment - totalAmount;
+
       await prisma.customer.update({
         where: { id: customerId },
         data: {
@@ -88,12 +104,15 @@ export async function POST(request: Request) {
           totalPurchases: {
             increment: quantity,
           },
+          balance: {
+            increment: balanceChange,
+          },
         },
       });
     }
 
-    // Only create finance record if payment status is PAID
-    if (paymentStatus === "PAID") {
+    // Only create finance record if payment status is PAID and there's cash payment
+    if (paymentStatus === "PAID" && manualPayment > 0) {
       await prisma.finance.create({
         data: {
           date: new Date(data.saleDate),
@@ -101,8 +120,10 @@ export async function POST(request: Request) {
           category: "Milk Sale",
           description: `Milk sale to ${
             data.buyer || "customer"
-          } - ${quantity}L @ ${pricePerLiter}/L`,
-          amount: totalAmount,
+          } - ${quantity}L @ ${pricePerLiter}/L (Cash: ৳${manualPayment}${
+            autoPayment > 0 ? `, Credit: ৳${autoPayment}` : ""
+          })`,
+          amount: manualPayment, // Only cash payment goes to finance
           paymentMethod: data.paymentMethod || null,
           referenceNumber: `MILK-SALE-${milkSale.id}`,
           notes: data.notes || null,

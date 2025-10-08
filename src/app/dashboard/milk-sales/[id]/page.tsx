@@ -150,6 +150,35 @@ export default function MilkSaleDetailPage() {
               </p>
             </div>
             <div>
+              <p className="text-sm text-gray-500">Amount Paid</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {formatCurrency(sale.amountPaid || 0)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Balance</p>
+              {(() => {
+                const balance = (sale.amountPaid || 0) - sale.totalAmount;
+                return balance === 0 ? (
+                  <p className="text-2xl font-bold text-gray-600">৳0.00</p>
+                ) : balance > 0 ? (
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">
+                      +{formatCurrency(balance)}
+                    </p>
+                    <p className="text-xs text-green-600">Advance/Credit</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-2xl font-bold text-red-600">
+                      -{formatCurrency(Math.abs(balance))}
+                    </p>
+                    <p className="text-xs text-red-600">Due/Pending</p>
+                  </div>
+                );
+              })()}
+            </div>
+            <div>
               <p className="text-sm text-gray-500">Payment Status</p>
               <Badge className={getPaymentColor(sale.paymentStatus)}>
                 {sale.paymentStatus}
