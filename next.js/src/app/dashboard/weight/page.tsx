@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,32 +9,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, Weight } from "lucide-react"
-import Link from "next/link"
-import { formatDate } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatDate } from "@/lib/utils";
+import { Eye, Pencil, Plus, Weight } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function WeightPage() {
-  const [weightRecords, setWeightRecords] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [weightRecords, setWeightRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchWeightRecords()
-  }, [])
+    fetchWeightRecords();
+  }, []);
 
   const fetchWeightRecords = async () => {
     try {
-      const response = await fetch("/api/weight")
+      const response = await fetch("/api/weight");
       if (response.ok) {
-        const data = await response.json()
-        setWeightRecords(data)
+        const data = await response.json();
+        setWeightRecords(data);
       }
     } catch (error) {
-      console.error("Failed to fetch weight records:", error)
+      console.error("Failed to fetch weight records:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -69,16 +69,35 @@ export default function WeightPage() {
                 <TableHead>Weight (kg)</TableHead>
                 <TableHead>Height (cm)</TableHead>
                 <TableHead>Body Condition</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {weightRecords.map((record: any) => (
                 <TableRow key={record.id}>
-                  <TableCell className="font-medium">{record.animal.tagNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {record.animal.tagNumber}
+                  </TableCell>
                   <TableCell>{formatDate(record.dateOfWeighing)}</TableCell>
                   <TableCell>{record.weight} kg</TableCell>
-                  <TableCell>{record.height ? `${record.height} cm` : "N/A"}</TableCell>
+                  <TableCell>
+                    {record.height ? `${record.height} cm` : "N/A"}
+                  </TableCell>
                   <TableCell>{record.bodyCondition || "N/A"}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/weight/${record.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/weight/${record.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -86,6 +105,5 @@ export default function WeightPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-
