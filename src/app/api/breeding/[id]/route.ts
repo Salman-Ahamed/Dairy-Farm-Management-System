@@ -55,10 +55,10 @@ export async function PUT(
     const data = await request.json();
 
     // Delete existing animal relations
-    await prisma.breedingMaleAnimal.deleteMany({
+    await prisma.breedingMale.deleteMany({
       where: { breedingId: params.id },
     });
-    await prisma.breedingFemaleAnimal.deleteMany({
+    await prisma.breedingFemale.deleteMany({
       where: { breedingId: params.id },
     });
 
@@ -112,10 +112,10 @@ export async function DELETE(
     }
 
     // Delete relations first
-    await prisma.breedingMaleAnimal.deleteMany({
+    await prisma.breedingMale.deleteMany({
       where: { breedingId: params.id },
     });
-    await prisma.breedingFemaleAnimal.deleteMany({
+    await prisma.breedingFemale.deleteMany({
       where: { breedingId: params.id },
     });
 
