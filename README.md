@@ -471,7 +471,7 @@ Monthly:
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript
-- **Database:** MySQL with Prisma ORM
+- **Database:** PostgreSQL with Prisma ORM 🐘
 - **Authentication:** NextAuth.js v4
 - **UI Components:** Radix UI + Tailwind CSS
 - **Styling:** Tailwind CSS
@@ -486,7 +486,7 @@ Before you begin, ensure you have the following installed:
 
 - Node.js 18.x or higher
 - npm or yarn or pnpm
-- MySQL 8.0 or higher (or use cloud MySQL like PlanetScale)
+- PostgreSQL 14+ (or use cloud PostgreSQL like Supabase, Neon, Railway)
 - Git
 
 ## 🚀 Getting Started
@@ -518,8 +518,8 @@ cp .env.example .env
 Then update the `.env` file with your configuration:
 
 ```env
-# Database
-DATABASE_URL="mysql://username:password@localhost:3306/dairy_farm"
+# Database (PostgreSQL)
+DATABASE_URL="postgresql://username:password@localhost:5432/dairy_farm"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
@@ -538,16 +538,33 @@ NEXT_PUBLIC_APP_NAME="Dairy Farm Management System"
 
 ### 4. Set Up the Database
 
-#### Create MySQL Database
+#### Create PostgreSQL Database
+
+**Option 1: Using psql (Command Line)**
 
 ```bash
-mysql -u root -p
+psql -U postgres
 ```
 
 ```sql
 CREATE DATABASE dairy_farm;
-EXIT;
+\q
 ```
+
+**Option 2: Using pgAdmin (GUI)**
+
+1. Open pgAdmin
+2. Right-click on "Databases"
+3. Select "Create" → "Database"
+4. Enter database name: `dairy_farm`
+5. Click "Save"
+
+**Option 3: Cloud Database (Recommended for Production)**
+
+- **Supabase**: Free PostgreSQL hosting with dashboard
+- **Neon**: Serverless PostgreSQL
+- **Railway**: One-click PostgreSQL deployment
+- **Render**: Managed PostgreSQL
 
 #### Run Prisma Migrations
 
@@ -555,6 +572,8 @@ EXIT;
 npx prisma generate
 npx prisma db push
 ```
+
+This will create all tables in your PostgreSQL database.
 
 ### 5. Create Initial User (Optional)
 
