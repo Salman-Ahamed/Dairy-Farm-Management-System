@@ -313,7 +313,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3">
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Link href="/dashboard/milk/new">
               <Button
                 variant="outline"
@@ -341,6 +341,22 @@ export default async function DashboardPage() {
                     <div className="font-semibold">Add Milk Sale</div>
                     <div className="text-xs text-gray-500">
                       Record milk sale transaction
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </Link>
+            <Link href="/dashboard/health/new">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-4"
+              >
+                <div className="flex items-center w-full">
+                  <Heart className="mr-3 h-6 w-6 text-red-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-semibold">Add Health Record</div>
+                    <div className="text-xs text-gray-500">
+                      Record animal health check
                     </div>
                   </div>
                 </div>
