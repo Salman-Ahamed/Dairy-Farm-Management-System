@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -10,32 +9,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Plus, ShoppingCart } from "lucide-react"
-import Link from "next/link"
-import { formatDate, formatCurrency } from "@/lib/utils"
+} from "@/components/ui/table";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Eye, Pencil, Plus, ShoppingCart } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function StockFeedPage() {
-  const [stockFeed, setStockFeed] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [stockFeed, setStockFeed] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStockFeed()
-  }, [])
+    fetchStockFeed();
+  }, []);
 
   const fetchStockFeed = async () => {
     try {
-      const response = await fetch("/api/stockfeed")
+      const response = await fetch("/api/stockfeed");
       if (response.ok) {
-        const data = await response.json()
-        setStockFeed(data)
+        const data = await response.json();
+        setStockFeed(data);
       }
     } catch (error) {
-      console.error("Failed to fetch stock feed:", error)
+      console.error("Failed to fetch stock feed:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -71,6 +71,7 @@ export default function StockFeedPage() {
                 <TableHead>Purchase Date</TableHead>
                 <TableHead>Supplier</TableHead>
                 <TableHead>Total Cost</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -78,11 +79,27 @@ export default function StockFeedPage() {
                 <TableRow key={feed.id}>
                   <TableCell className="font-medium">{feed.feedName}</TableCell>
                   <TableCell>{feed.feedType.replace("_", " ")}</TableCell>
-                  <TableCell>{feed.currentStock} {feed.unit}</TableCell>
+                  <TableCell>
+                    {feed.currentStock} {feed.unit}
+                  </TableCell>
                   <TableCell>{feed.unit}</TableCell>
                   <TableCell>{formatDate(feed.purchaseDate)}</TableCell>
                   <TableCell>{feed.supplier || "N/A"}</TableCell>
                   <TableCell>{formatCurrency(feed.totalCost)}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Link href={`/dashboard/stockfeed/${feed.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Link href={`/dashboard/stockfeed/${feed.id}/edit`}>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -90,6 +107,5 @@ export default function StockFeedPage() {
         )}
       </Card>
     </div>
-  )
+  );
 }
-
