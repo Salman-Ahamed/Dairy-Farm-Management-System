@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Info, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -116,6 +116,28 @@ export default function StockFeedDetailPage() {
           </Button>
         </div>
       </div>
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-blue-900">Finance Integration</p>
+              <p className="text-sm text-blue-700 mt-1">
+                This stock feed purchase is recorded as <strong>Expense</strong>{" "}
+                in{" "}
+                <Link
+                  href="/dashboard/finance"
+                  className="underline font-semibold"
+                >
+                  Farm Finance
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

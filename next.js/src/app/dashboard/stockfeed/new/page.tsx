@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -77,6 +77,24 @@ export default function NewStockFeedPage() {
           <p className="text-gray-500 mt-1">Add new feed inventory</p>
         </div>
       </div>
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-blue-900">
+                Auto Finance Integration
+              </p>
+              <p className="text-sm text-blue-700 mt-1">
+                Stock feed purchases will be{" "}
+                <strong>automatically added</strong> as Expense in Farm Finance
+                records.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

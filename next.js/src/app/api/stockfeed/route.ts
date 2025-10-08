@@ -54,6 +54,24 @@ export async function POST(request: Request) {
       },
     });
 
+    // Automatically create finance expense record
+    await prisma.finance.create({
+      data: {
+        date: new Date(data.purchaseDate),
+        type: "EXPENSE",
+        category: "Stock Feed Purchase",
+        description: `${data.feedName} (${data.feedType}) - ${quantity}${
+          data.unit || "kg"
+        } @ ${costPerUnit}৳/${data.unit || "kg"}${
+          data.supplier ? ` from ${data.supplier}` : ""
+        }`,
+        amount: totalCost,
+        paymentMethod: null,
+        referenceNumber: `FEED-${stockFeed.id}`,
+        notes: data.notes || null,
+      },
+    });
+
     return NextResponse.json(stockFeed, { status: 201 });
   } catch (error) {
     console.error("Error creating stock feed:", error);
