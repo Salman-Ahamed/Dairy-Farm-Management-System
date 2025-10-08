@@ -1,293 +1,289 @@
-# Setup Guide - Dairy Farm Management System
+# 🚀 Setup Guide - Dairy Farm Management System
 
-## Prerequisites Installation
+এই গাইড আপনাকে ধাপে ধাপে প্রজেক্ট সেটআপ করতে সাহায্য করবে।
 
-### 1. Install Java JDK
+## 📋 প্রয়োজনীয় সফটওয়্যার
 
-1. Download **JDK 8** from: https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
-   - Or download **JDK 11+** and install JavaFX separately
-2. Install JDK
-3. Verify installation:
-   ```powershell
-   java -version
-   ```
+### 1. Node.js ইনস্টল করুন
 
-### 2. Install MySQL
+**Windows:**
+- [Node.js ডাউনলোড করুন](https://nodejs.org/) (LTS version)
+- ইনস্টলার রান করুন এবং ডিফল্ট সেটিংস রাখুন
 
-1. Download MySQL Community Server: https://dev.mysql.com/downloads/mysql/
-2. Install with default settings
-3. Remember your **root password** during installation
-4. Start MySQL service from Windows Services
-
-### 3. Download Required Libraries
-
-**Option A: Manual Download**
-
-- MySQL Connector/J: https://dev.mysql.com/downloads/connector/j/
-- JavaMail API: https://eclipse-ee4j.github.io/mail/
-
-**Option B: Maven Dependencies** (if you set up Maven later)
-
-```xml
-<dependency>
-    <groupId>mysql</groupId>
-    <artifactId>mysql-connector-java</artifactId>
-    <version>8.0.33</version>
-</dependency>
-<dependency>
-    <groupId>com.sun.mail</groupId>
-    <artifactId>javax.mail</artifactId>
-    <version>1.6.2</version>
-</dependency>
+**Verify Installation:**
+```bash
+node --version
+npm --version
 ```
 
----
+### 2. MySQL ইনস্টল করুন
 
-## Database Setup
+**Option A: Local MySQL**
 
-### Create Database
+Windows:
+- [MySQL Installer ডাউনলোড করুন](https://dev.mysql.com/downloads/installer/)
+- MySQL Server 8.0 ইনস্টল করুন
+- Password সেট করুন (মনে রাখুন!)
 
-1. Open MySQL Workbench or MySQL Command Line
-2. Login with root user
-3. Run:
-   ```sql
-   CREATE DATABASE dairy_farm;
-   USE dairy_farm;
-   ```
+**Option B: Cloud Database (সহজ পদ্ধতি)**
 
-### Update Database Password
+[PlanetScale](https://planetscale.com/) ব্যবহার করুন (ফ্রি):
+1. PlanetScale account তৈরি করুন
+2. নতুন database তৈরি করুন
+3. Connection string কপি করুন
 
-1. Open: `model/DatabaseConnection.java`
-2. Update line 12 with your MySQL root password:
-   ```java
-   String databasePassword = "your_actual_password";
-   ```
+### 3. Git ইনস্টল করুন (Optional)
 
-**Note:** You'll need to create database tables. The application will likely show errors until tables are created.
+- [Git ডাউনলোড করুন](https://git-scm.com/downloads)
 
----
+## 🔧 প্রজেক্ট সেটআপ
 
-## IDE Setup Instructions
+### Step 1: ফোল্ডারে যান
 
-## Option 1: IntelliJ IDEA (Recommended)
-
-### Download & Install
-
-1. Download IntelliJ IDEA Community Edition: https://www.jetbrains.com/idea/download/
-2. Install with default settings
-
-### Setup Project
-
-1. **Open IntelliJ IDEA**
-2. Click **"Open"** on welcome screen
-3. Navigate to: `E:\codes\work\org\Dairy-Farm-Management-System`
-4. Click **"OK"**
-
-### Configure Project Structure
-
-1. Go to: **File → Project Structure** (Ctrl+Alt+Shift+S)
-2. **Project Settings → Project**:
-   - Set **Project SDK** to your installed JDK
-   - Set **Project language level** to 8 or higher
-3. **Project Settings → Libraries**:
-   - Click **"+"** → **Java**
-   - Add MySQL Connector JAR file
-   - Add JavaMail JAR files
-4. Click **"Apply"** → **"OK"**
-
-### Add JavaFX (if using JDK 11+)
-
-1. Download JavaFX SDK: https://gluonhq.com/products/javafx/
-2. Go to: **File → Project Structure → Libraries**
-3. Click **"+"** → **Java**
-4. Navigate to JavaFX SDK `lib` folder
-5. Select all JAR files → **"OK"**
-
-### Configure Run Configuration
-
-1. Right-click on `DairyFarm.java`
-2. Click **"Run 'DairyFarm.main()'"**
-
-   **If you get JavaFX errors:**
-
-   - Go to: **Run → Edit Configurations**
-   - Select **DairyFarm** configuration
-   - Add VM options:
-     ```
-     --module-path "C:\path\to\javafx-sdk\lib" --add-modules javafx.controls,javafx.fxml
-     ```
-   - Replace path with your actual JavaFX SDK path
-
-### Run the Project
-
-1. Right-click on `DairyFarm.java`
-2. Select **"Run 'DairyFarm.main()'"**
-3. The Login screen should appear!
-
----
-
-## Option 2: Eclipse IDE
-
-### Download & Install
-
-1. Download Eclipse IDE for Java Developers: https://www.eclipse.org/downloads/
-2. Install and launch Eclipse
-
-### Import Project
-
-1. **File → Open Projects from File System**
-2. Click **"Directory"**
-3. Select: `E:\codes\work\org\Dairy-Farm-Management-System`
-4. Click **"Finish"**
-
-### Configure Build Path
-
-1. Right-click on project → **Properties**
-2. Go to **Java Build Path → Libraries**
-3. Click **"Add External JARs"**
-4. Add:
-   - MySQL Connector JAR
-   - JavaMail JAR(s)
-   - JavaFX JARs (if JDK 11+)
-5. Click **"Apply and Close"**
-
-### Install e(fx)clipse Plugin (for JavaFX support)
-
-1. **Help → Eclipse Marketplace**
-2. Search: **"e(fx)clipse"**
-3. Install the plugin
-4. Restart Eclipse
-
-### Run the Project
-
-1. Right-click on `DairyFarm.java`
-2. **Run As → Java Application**
-3. Login screen should appear!
-
----
-
-## Option 3: NetBeans IDE
-
-### Download & Install
-
-1. Download Apache NetBeans: https://netbeans.apache.org/download/
-2. Install with default settings
-
-### Open Project
-
-1. **File → Open Project**
-2. Navigate to: `E:\codes\work\org\Dairy-Farm-Management-System`
-3. Click **"Open Project"**
-
-### Add Libraries
-
-1. In Projects window, right-click on **Libraries** folder
-2. Select **"Add JAR/Folder"**
-3. Add:
-   - MySQL Connector JAR
-   - JavaMail JAR(s)
-   - JavaFX JARs (if needed)
-
-### Run the Project
-
-1. Right-click on project name
-2. Click **"Run"**
-3. Login screen should appear!
-
----
-
-## Common Issues & Solutions
-
-### Issue 1: "Module javafx not found"
-
-**Solution:**
-
-- Add JavaFX SDK to libraries
-- Add VM arguments in run configuration
-
-### Issue 2: "Cannot connect to database"
-
-**Solution:**
-
-- Verify MySQL is running (Windows Services)
-- Check database name: `dairy_farm` exists
-- Verify username/password in `DatabaseConnection.java`
-
-### Issue 3: "ClassNotFoundException: com.mysql.cj.jdbc.Driver"
-
-**Solution:**
-
-- Add MySQL Connector JAR to project libraries
-- Clean and rebuild project
-
-### Issue 4: "Cannot load FXML files"
-
-**Solution:**
-
-- Verify project structure
-- Make sure `view`, `controller`, `model` folders are in source root
-
-### Issue 5: Table doesn't exist errors
-
-**Solution:**
-
-- You need to create database tables
-- Contact project developer for SQL schema
-- Or run the application and check error messages for table names
-
----
-
-## Next Steps After Running
-
-1. The application starts with a **Login screen**
-2. You may need to create database tables based on error messages
-3. Check if there's a SignUp option to create first user
-4. Explore the various modules:
-   - Animal Records
-   - Animal Health
-   - Breeding
-   - Milk Records
-   - Milk Sales
-   - Employees
-   - Stock Feed
-   - Farm Finance
-
----
-
-## Quick Commands Reference
-
-### Check Java Installation
-
-```powershell
-java -version
-javac -version
+```bash
+cd next.js
 ```
 
-### Check MySQL Status
+### Step 2: Dependencies ইনস্টল করুন
 
-```powershell
-# Open Services
-services.msc
-# Look for "MySQL" service
+```bash
+npm install
 ```
 
-### MySQL Command Line
+এটি সব প্রয়োজনীয় packages ইনস্টল করবে। এতে 5-10 মিনিট লাগতে পারে।
 
+### Step 3: Environment Variables সেট করুন
+
+1. `.env.example` ফাইল কপি করুন এবং `.env` নাম দিন:
+
+**Windows CMD:**
+```cmd
+copy .env.example .env
+```
+
+**PowerShell:**
 ```powershell
+Copy-Item .env.example .env
+```
+
+2. `.env` ফাইল এডিট করুন এবং আপনার তথ্য দিন:
+
+```env
+# আপনার MySQL connection
+DATABASE_URL="mysql://root:your_password@localhost:3306/dairy_farm"
+
+# Random string generate করুন (যেকোনো কিছু লিখতে পারেন)
+NEXTAUTH_SECRET="my-super-secret-key-12345"
+
+# Local development এর জন্য
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+**DATABASE_URL ফরম্যাট:**
+```
+mysql://[username]:[password]@[host]:[port]/[database_name]
+```
+
+উদাহরণ:
+- Username: `root`
+- Password: `mypassword123`
+- Host: `localhost`
+- Port: `3306`
+- Database: `dairy_farm`
+
+= `mysql://root:mypassword123@localhost:3306/dairy_farm`
+
+### Step 4: Database তৈরি করুন
+
+#### Option A: MySQL Workbench ব্যবহার করে
+
+1. MySQL Workbench খুলুন
+2. Local connection এ connect করুন
+3. নতুন query tab খুলুন
+4. Run করুন:
+
+```sql
+CREATE DATABASE dairy_farm;
+```
+
+#### Option B: Command Line ব্যবহার করে
+
+```bash
 mysql -u root -p
-# Enter your password
-SHOW DATABASES;
-USE dairy_farm;
-SHOW TABLES;
 ```
+
+Password দিন, তারপর:
+
+```sql
+CREATE DATABASE dairy_farm;
+EXIT;
+```
+
+### Step 5: Database Schema সেটআপ করুন
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+এটি আপনার database এ সব tables তৈরি করবে।
+
+### Step 6: Database চেক করুন (Optional)
+
+Prisma Studio দিয়ে database দেখুন:
+
+```bash
+npx prisma studio
+```
+
+একটি browser window খুলবে যেখানে আপনি database দেখতে পারবেন।
+
+## 🎉 প্রজেক্ট রান করুন
+
+### Development Server শুরু করুন
+
+```bash
+npm run dev
+```
+
+এটি দেখাবে:
+```
+▲ Next.js 14.0.4
+- Local:        http://localhost:3000
+- Ready in 2.5s
+```
+
+### Browser এ খুলুন
+
+ব্রাউজারে যান: **http://localhost:3000**
+
+## 👤 প্রথম User তৈরি করুন
+
+1. "Sign Up" বাটনে ক্লিক করুন
+2. আপনার তথ্য দিন:
+   - Full Name: `Admin User`
+   - Email: `admin@dairyfarm.com`
+   - Role: `Admin`
+   - Password: `admin123` (নিরাপদ password ব্যবহার করুন!)
+3. "Sign Up" বাটনে ক্লিক করুন
+4. Login page এ redirect হবে
+5. আপনার email ও password দিয়ে login করুন
+
+## ✅ সেটআপ সফল হয়েছে কিনা চেক করুন
+
+যদি সব ঠিকঠাক থাকে, আপনি দেখবেন:
+
+1. ✅ Login page লোড হয়েছে
+2. ✅ Sign up করতে পারছেন
+3. ✅ Login করতে পারছেন
+4. ✅ Dashboard দেখতে পাচ্ছেন
+5. ✅ Sidebar এ সব menu দেখা যাচ্ছে
+
+## 🎯 পরবর্তী পদক্ষেপ
+
+### Animals যোগ করুন
+
+1. Sidebar থেকে "Animal Records" এ যান
+2. "Add Animal" বাটনে ক্লিক করুন
+3. Animal এর তথ্য দিন
+4. "Create Animal" বাটনে ক্লিক করুন
+
+### অন্যান্য Modules ব্যবহার করুন
+
+- **Animal Health**: পশুর স্বাস্থ্য রেকর্ড যোগ করুন
+- **Animal Weight**: ওজন ট্র্যাক করুন
+- **Breeding**: প্রজনন রেকর্ড যোগ করুন
+- **Milk Records**: দুধের উৎপাদন লগ করুন
+- **Milk Sales**: বিক্রয় রেকর্ড করুন
+- **Stock Feed**: খাদ্য inventory পরিচালনা করুন
+- **Employees**: কর্মচারী যোগ করুন
+- **Farm Finance**: আয়-ব্যয় ট্র্যাক করুন
+
+## 🐛 সমস্যা সমাধান
+
+### Database Connection Error
+
+**Error:** `Can't reach database server`
+
+**সমাধান:**
+1. MySQL service চালু আছে কিনা চেক করুন
+2. `.env` ফাইলে DATABASE_URL সঠিক আছে কিনা চেক করুন
+3. Database তৈরি হয়েছে কিনা চেক করুন
+
+### Port 3000 Already in Use
+
+**সমাধান:**
+
+**Windows:**
+```cmd
+netstat -ano | findstr :3000
+taskkill /PID [PID_NUMBER] /F
+```
+
+অথবা অন্য port ব্যবহার করুন:
+```bash
+npm run dev -- -p 3001
+```
+
+### Prisma Generate Error
+
+**সমাধান:**
+```bash
+rm -rf node_modules
+npm install
+npx prisma generate
+```
+
+### Module Not Found Errors
+
+**সমাধান:**
+```bash
+npm install
+```
+
+## 📱 Production এ Deploy করুন
+
+### Vercel এ Deploy (সবচেয়ে সহজ)
+
+1. [Vercel](https://vercel.com) এ account তৈরি করুন
+2. GitHub এ আপনার code push করুন
+3. Vercel এ "Import Project"
+4. Environment variables যোগ করুন
+5. Deploy!
+
+### Environment Variables (Production)
+
+Production এ এই variables প্রয়োজন:
+```env
+DATABASE_URL="your-production-database-url"
+NEXTAUTH_URL="https://your-domain.com"
+NEXTAUTH_SECRET="different-secret-for-production"
+```
+
+## 🎓 আরো শিখুন
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [NextAuth.js Documentation](https://next-auth.js.org/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+## 💡 টিপস
+
+1. **Regular Backup**: নিয়মিত database backup নিন
+2. **Strong Passwords**: শক্তিশালী password ব্যবহার করুন
+3. **Environment Variables**: কখনো `.env` ফাইল commit করবেন না
+4. **Updates**: নিয়মিত dependencies update করুন
+
+## 🤝 সাহায্য প্রয়োজন?
+
+যদি কোনো সমস্যায় পড়েন:
+
+1. Error message ভালোভাবে পড়ুন
+2. Google এ search করুন
+3. Documentation চেক করুন
+4. GitHub এ issue তৈরি করুন
 
 ---
 
-## Need Help?
+Happy Coding! 🚀🐄
 
-- Check error messages in IDE console
-- Verify all prerequisites are installed
-- Ensure MySQL service is running
-- Check database credentials
-
-**Project Path:** `E:\codes\work\org\Dairy-Farm-Management-System`
