@@ -1,13 +1,16 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import {
   Beef,
+  DollarSign,
   Heart,
   Milk,
   PackageCheck,
   TrendingUp,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 
 async function getDashboardStats() {
   const [
@@ -172,25 +175,39 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <a
-              href="/dashboard/animals"
-              className="block p-3 rounded-lg hover:bg-gray-50 border"
-            >
-              <div className="font-medium">Add New Animal</div>
-              <div className="text-sm text-muted-foreground">
-                Register a new animal
-              </div>
-            </a>
-            <a
-              href="/dashboard/milk"
-              className="block p-3 rounded-lg hover:bg-gray-50 border"
-            >
-              <div className="font-medium">Record Milk Production</div>
-              <div className="text-sm text-muted-foreground">
-                Log today&apos;s milk yield
-              </div>
-            </a>
+          <CardContent className="flex flex-col gap-3">
+            <Link href="/dashboard/milk/new">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-4"
+              >
+                <div className="flex items-center w-full">
+                  <Milk className="mr-3 h-6 w-6 text-blue-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-semibold">Add Milk Production</div>
+                    <div className="text-xs text-gray-500">
+                      Record daily milk yield
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </Link>
+            <Link href="/dashboard/milk-sales/new">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto py-4"
+              >
+                <div className="flex items-center w-full">
+                  <DollarSign className="mr-3 h-6 w-6 text-green-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="font-semibold">Add Milk Sale</div>
+                    <div className="text-xs text-gray-500">
+                      Record milk sale transaction
+                    </div>
+                  </div>
+                </div>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
